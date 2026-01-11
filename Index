@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equalizer Pro - By Sachin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Custom Range Slider Styling */
+        input[type=range][orient=vertical] {
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical; /* WebKit */
+            width: 8px;
+            height: 100%;
+            padding: 0 5px;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Neon Glow Effects */
+        .neon-text {
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Slider Thumb Customization */
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+        }
+
+        /* Loader */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 20px;
+            height: 20px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* AI Gradient Text */
+        .ai-gradient {
+            background: linear-gradient(to right, #60a5fa, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ai-border {
+            position: relative;
+            background: #1f2937;
+            background-clip: padding-box;
+            border: 2px solid transparent;
+            border-radius: 1rem;
+        }
+        .ai-border::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: -1;
+            margin: -2px;
+            border-radius: inherit;
+            background: linear-gradient(to right, #60a5fa, #a78bfa, #f472b6);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen font-sans overflow-x-hidden selection:bg-blue-500 selection:text-white">
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-6 max-w-5xl">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-700 pb-4">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 neon-text">
+                    <i class="fas fa-wave-square mr-2"></i>Equalizer Pro
+                </h1>
+                <p class="text-gray-400 text-sm mt-1">High Fidelity Audio Engine</p>
+            </div>
+            <div class="flex items-center space-x-2 bg-gray-800 px-4 py-2 rounded-full border border-gray-700">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-xs font-bold">
+                    S
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider">Developed by</p>
+                    <p class="font-semibold text-blue-400">Sachin</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Player & Visualizer Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            
+            <!-- Left: Controls & File Upload -->
+            <div class="lg:col-span-1 bg-gray-800 rounded-2xl p-6 border border-gray-700 shadow-xl">
+                <h2 class="text-xl font-semibold mb-4 text-blue-300"><i class="fas fa-compact-disc mr-2"></i>Player</h2>
+                
+                <!-- File Input -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Upload Track</label>
+                    <div class="relative">
+                        <input type="file" id="audioUpload" accept="audio/*" class="hidden">
+                        <label for="audioUpload" class="flex items-center justify-center w-full px-4 py-3 bg-gray-700 hover:bg-gray-600 border-2 border-dashed border-gray-500 rounded-lg cursor-pointer transition-colors group">
+                            <i class="fas fa-cloud-upload-alt text-xl text-gray-400 group-hover:text-white mr-2"></i>
+                            <span class="text-gray-300 group-hover:text-white">Choose Audio File</span>
+                        </label>
+                    </div>
+                    <p id="fileName" class="text-xs text-gray-500 mt-2 truncate">No file selected</p>
+                </div>
+
+                <!-- Main Controls -->
+                <div class="flex justify-center items-center space-x-6 mb-6">
+                    <button id="prevBtn" class="text-gray-400 hover:text-white transition"><i class="fas fa-step-backward text-xl"></i></button>
+                    <button id="playBtn" class="w-16 h-16 bg-blue-600 hover:bg-blue-500 rounded-full flex items-center justify-center shadow-lg shadow-blue-900/50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fas fa-play text-2xl ml-1 text-white"></i>
+                    </button>
+                    <button id="nextBtn" class="text-gray-400 hover:text-white transition"><i class="fas fa-step-forward text-xl"></i></button>
+                </div>
+
+                <!-- Volume -->
+                <div class="mb-2">
+                    <div class="flex justify-between text-xs text-gray-400 mb-1">
+                        <span><i class="fas fa-volume-down"></i></span>
+                        <span id="volValue">100%</span>
+                        <span><i class="fas fa-volume-up"></i></span>
+                    </div>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider-thumb">
+                </div>
+
+                <!-- Playback Info -->
+                <div class="mt-4 bg-gray-900/50 rounded-lg p-3 text-center border border-gray-700/50">
+                    <p id="trackTime" class="text-2xl font-mono text-green-400">00:00</p>
+                    <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2 overflow-hidden">
+                        <div id="progressBar" class="bg-green-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Visualizer -->
+            <div class="lg:col-span-2 bg-gray-800 rounded-2xl p-6 border border-gray-700 shadow-xl flex flex-col relative overflow-hidden transition-colors duration-1000" id="visualizerContainer">
+                <div class="flex justify-between items-center mb-2 z-10">
+                    <h2 class="text-xl font-semibold text-white/90"><i class="fas fa-chart-bar mr-2"></i>Frequency Visualizer</h2>
+                    <span class="text-xs bg-gray-700/50 px-2 py-1 rounded text-gray-300">Live Spectrum</span>
+                </div>
+                
+                <canvas id="visualizer" class="w-full h-64 bg-gray-900/50 rounded-xl border border-gray-600/30 shadow-inner z-10 backdrop-blur-sm"></canvas>
+                
+                <!-- Background decoration -->
+                <div id="glow1" class="absolute top-0 right-0 w-64 h-64 bg-purple-600 rounded-full mix-blend-screen filter blur-[80px] opacity-20 animate-pulse transition-colors duration-1000"></div>
+                <div id="glow2" class="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full mix-blend-screen filter blur-[80px] opacity-20 animate-pulse transition-colors duration-1000" style="animation-delay: 1s;"></div>
+            </div>
+        </div>
+
+        <!-- AI Assistant Section -->
+        <div class="ai-border mb-8 p-6 shadow-2xl">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex-1">
+                    <h3 class="text-xl font-bold ai-gradient mb-1"><i class="fas fa-magic mr-2"></i>AI Audio Engineer</h3>
+                    <p class="text-gray-400 text-sm">Describe your vibe (e.g., "Neon Tokyo Night", "Cozy Coffee Shop", "Heavy Metal Gym") and let Gemini tune the EQ and style.</p>
+                </div>
+            </div>
+            <div class="mt-4 flex flex-col md:flex-row gap-3">
+                <input type="text" id="aiPrompt" placeholder="Describe the sound & look you want..." class="flex-1 bg-gray-900 border border-gray-600 text-white text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 p-3 placeholder-gray-500">
+                <button id="generateAiEqBtn" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium rounded-lg text-sm px-6 py-3 text-center inline-flex items-center justify-center transition-all shadow-lg shadow-purple-900/30">
+                    <span id="btnText">Generate Preset ✨</span>
+                    <div id="btnLoader" class="loader ml-2 hidden"></div>
+                </button>
+            </div>
+            <div id="aiResponseArea" class="mt-3 hidden">
+                <div class="bg-gray-900/80 rounded-lg p-3 border border-gray-700 text-sm text-gray-300 flex items-start">
+                    <i class="fas fa-info-circle text-blue-400 mt-0.5 mr-2"></i>
+                    <p id="aiMessageText"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Equalizer Section -->
+        <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 shadow-xl mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-green-300 mb-4 md:mb-0"><i class="fas fa-sliders-h mr-2"></i>10-Band Equalizer</h2>
+                
+                <div class="flex items-center space-x-3">
+                    <label class="text-sm text-gray-400">Preset:</label>
+                    <select id="presetSelect" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 w-48">
+                        <option value="flat">Flat (Default)</option>
+                        <option value="bass">Bass Boost</option>
+                        <option value="rock">Rock</option>
+                        <option value="pop">Pop</option>
+                        <option value="jazz">Jazz</option>
+                        <option value="classical">Classical</option>
+                        <option value="vocal">Vocal Booster</option>
+                        <option value="treble">Treble Booster</option>
+                        <option value="custom">Custom / AI</option>
+                    </select>
+                    <button id="resetEq" class="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-gray-300 transition" title="Reset EQ">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sliders Container -->
+            <div class="grid grid-cols-5 md:grid-cols-10 gap-2 h-64 items-end pb-4 bg-gray-900/50 rounded-xl p-4 border border-gray-700/30">
+                <!-- Sliders will be generated by JS -->
+            </div>
+        </div>
+
+        <!-- Sonic Analyzer Section -->
+        <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700 shadow-xl relative overflow-hidden">
+             <!-- Decorative elements -->
+             <div class="absolute -right-10 -top-10 text-9xl text-gray-700 opacity-20 rotate-12 pointer-events-none">
+                <i class="fas fa-wave-square"></i>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6 relative z-10">
+                <div class="md:w-1/3">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-2"><i class="fas fa-microscope mr-2"></i>Sonic Analyzer</h3>
+                    <p class="text-gray-400 text-sm mb-4">Not sure what your current EQ settings sound like? Let the AI analyze the frequency curve and give you a breakdown.</p>
+                    <button id="analyzeEqBtn" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center justify-center border border-gray-600 transition-all hover:border-yellow-500/50">
+                        <span id="analyzeBtnText">Analyze My Mix ✨</span>
+                        <div id="analyzeLoader" class="loader ml-2 hidden" style="border-top-color: #fbbf24;"></div>
+                    </button>
+                </div>
+                <div class="md:w-2/3 bg-gray-900 rounded-lg p-4 border border-gray-700 min-h-[100px] flex items-center">
+                    <div id="analyzerPlaceholder" class="text-gray-500 text-sm italic text-center w-full">
+                        Analysis results will appear here...
+                    </div>
+                    <div id="analyzerContent" class="hidden w-full">
+                        <h4 class="text-yellow-400 font-bold text-sm mb-1 uppercase tracking-wide">Audio Signature</h4>
+                        <p id="analyzerText" class="text-gray-300 text-sm leading-relaxed"></p>
+                        <div class="mt-3 flex flex-wrap gap-2" id="analyzerTags">
+                            <!-- Tags injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-8 text-center text-gray-500 text-sm pb-4">
+            <p>&copy; 2024 Audio Engine. All rights reserved.</p>
+            <p class="mt-1">Designed & Developed by <span class="text-blue-400 font-bold">Sachin</span></p>
+        </footer>
+
+    </div>
+
+    <!-- Hidden Audio Element -->
+    <audio id="audioElement" crossorigin="anonymous"></audio>
+
+    <script>
+        const apiKey = ""; // System provided API Key
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioElement = document.getElementById('audioElement');
+            const playBtn = document.getElementById('playBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const fileInput = document.getElementById('audioUpload');
+            const fileNameDisplay = document.getElementById('fileName');
+            const presetSelect = document.getElementById('presetSelect');
+            const visualizerCanvas = document.getElementById('visualizer');
+            const canvasCtx = visualizerCanvas.getContext('2d');
+            const trackTimeDisplay = document.getElementById('trackTime');
+            const progressBar = document.getElementById('progressBar');
+            const resetBtn = document.getElementById('resetEq');
+            const glow1 = document.getElementById('glow1');
+            const glow2 = document.getElementById('glow2');
+            
+            // AI Elements
+            const aiPromptInput = document.getElementById('aiPrompt');
+            const generateAiEqBtn = document.getElementById('generateAiEqBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoader = document.getElementById('btnLoader');
+            const aiResponseArea = document.getElementById('aiResponseArea');
+            const aiMessageText = document.getElementById('aiMessageText');
+
+            // Analyzer Elements
+            const analyzeEqBtn = document.getElementById('analyzeEqBtn');
+            const analyzeBtnText = document.getElementById('analyzeBtnText');
+            const analyzeLoader = document.getElementById('analyzeLoader');
+            const analyzerPlaceholder = document.getElementById('analyzerPlaceholder');
+            const analyzerContent = document.getElementById('analyzerContent');
+            const analyzerText = document.getElementById('analyzerText');
+            const analyzerTags = document.getElementById('analyzerTags');
+
+            let source;
+            let analyser;
+            let filters = [];
+            let isPlaying = false;
+            let animationId;
+            
+            // Default Visualizer Colors (Blue, Purple, Green)
+            let visColors = ['#3b82f6', '#8b5cf6', '#10b981'];
+
+            // Frequency Bands
+            const frequencies = [60, 170, 310, 600, 1000, 3000, 6000, 12000, 14000, 16000];
+            
+            // Presets Data (dB values)
+            const presets = {
+                flat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                bass: [9, 7, 6, 5, 0, 0, 0, 0, 0, 0],
+                rock: [5, 4, 3, 1, -1, -1, 2, 4, 5, 6],
+                pop: [-1, -1, 0, 2, 4, 4, 2, 0, -1, -2],
+                jazz: [3, 2, 1, 2, -2, -2, 0, 1, 3, 4],
+                classical: [5, 4, 3, 2, -1, -1, 0, 2, 4, 5],
+                vocal: [-2, -2, -1, 2, 5, 5, 3, 1, 0, -1],
+                treble: [0, 0, 0, 0, 0, 2, 4, 6, 8, 10],
+                custom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
+            };
+
+            // Initialize Audio Graph
+            function initAudio() {
+                if (source) return; // Already initialized
+
+                source = audioContext.createMediaElementSource(audioElement);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256; 
+
+                // Create Filters
+                let prevNode = source;
+                frequencies.forEach((freq, index) => {
+                    const filter = audioContext.createBiquadFilter();
+                    filter.type = 'peaking'; 
+                    filter.frequency.value = freq;
+                    filter.Q.value = 1.4; 
+                    filter.gain.value = 0;
+
+                    prevNode.connect(filter);
+                    prevNode = filter;
+                    filters.push(filter);
+                });
+
+                prevNode.connect(analyser);
+                analyser.connect(audioContext.destination);
+
+                drawVisualizer();
+            }
+
+            // Create Sliders UI
+            const slidersContainer = document.querySelector('.grid.grid-cols-5.md\\:grid-cols-10');
+            frequencies.forEach((freq, i) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex flex-col items-center h-full justify-end group';
+
+                const valDisplay = document.createElement('span');
+                valDisplay.className = 'text-xs text-blue-300 mb-2 opacity-0 group-hover:opacity-100 transition-opacity font-mono';
+                valDisplay.innerText = '0dB';
+                valDisplay.id = `val-${i}`;
+
+                const range = document.createElement('input');
+                range.type = 'range';
+                range.min = '-12';
+                range.max = '12';
+                range.value = '0';
+                range.step = '0.5';
+                range.orient = 'vertical'; 
+                range.className = 'h-32 w-2 appearance-none bg-gray-700 rounded-full outline-none slider-vertical cursor-pointer accent-blue-500 hover:accent-blue-400';
+                range.sty
